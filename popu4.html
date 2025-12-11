@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>India — COVID-19 Data Story</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --bg:#0f1724; --card:#e6eef8; --accent:#0b5cff; --muted:#6b7280; --danger:#ff3b30;
+  --glass: rgba(255,255,255,0.06);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,#081124 0%, #0f1724 100%);color:var(--card);font-family:'Inter',system-ui,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.container{max-width:1100px;margin:28px auto;padding:28px;border-left:6px solid var(--accent);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow: 0 10px 30px rgba(2,6,23,0.6);border-radius:6px}
+.header{display:flex;align-items:center;gap:18px}
+.logo{width:68px;height:68px;background:var(--glass);display:flex;align-items:center;justify-content:center;border-radius:6px;border:3px solid var(--accent);font-weight:800;color:var(--accent);font-size:18px}
+.title{font-size:20px;font-weight:800;color:#e9f2ff}
+.subtitle{color:var(--muted);font-size:12px;margin-top:4px}
+.row{display:flex;gap:18px;margin-top:18px;flex-wrap:wrap}
+.card{background:transparent;border:1px dashed rgba(255,255,255,0.04);padding:14px;border-radius:6px;flex:1;min-width:220px}
+.metrics{display:flex;gap:12px;flex-wrap:wrap}
+.metric{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:14px;border-radius:6px;min-width:150px;border-left:4px solid rgba(255,255,255,0.04)}
+.metric h3{margin:0;font-size:22px;color:var(--card)}
+.metric p{margin:4px 0 0;font-size:12px;color:var(--muted)}
+.section-title{font-weight:700;margin-top:18px;color:#dfeeff}
+.kv{display:flex;gap:12px;align-items:center}
+.kv strong{font-size:20px;color:var(--accent);display:block}
+.grid{display:grid;grid-template-columns:1fr 380px;gap:18px;margin-top:18px}
+.small{font-size:13px;color:var(--muted);line-height:1.5}
+.chart-wrap{background:linear-gradient(180deg, rgba(11,92,255,0.03), rgba(11,92,255,0.01));padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.03)}
+.table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+.table th{background:rgba(255,255,255,0.02);padding:8px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px dashed rgba(255,255,255,0.03)}
+.table td{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.02)}
+.footer{margin-top:22px;padding-top:16px;border-top:1px dashed rgba(255,255,255,0.03);color:var(--muted);font-size:13px}
+.badge{display:inline-block;padding:6px 10px;border-radius:6px;background:var(--glass);border:1px solid rgba(255,255,255,0.03);font-weight:700;color:var(--accent)}
+.insight{background:rgba(11,92,255,0.06);padding:10px;border-radius:6px;margin-top:8px;color:#dfeeff}
+.small-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.note{font-size:12px;color:var(--muted);margin-top:10px}
+.highlight{color:var(--accent);font-weight:700}
+.center{display:flex;align-items:center;justify-content:center}
+.neobrut{border:3px solid #f7f7f7;background:transparent;padding:12px;border-radius:4px;color:#f7f7f7}
+@media(max-width:900px){.grid{grid-template-columns:1fr} .small-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">C-IND</div>
+    <div>
+      <div class="title">India — COVID-19 Data Story</div>
+      <div class="subtitle">Daily cases, deaths and monthly patterns — sourced from Our World in Data (OWID)</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <div class="section-title">Executive Summary</div>
+      <div class="small">This compact dashboard walks through India's COVID-19 daily case and death trends, highlights peak waves, monthly aggregates, and offers concise, actionable insights for policymakers and the public. Visuals focus on daily cases with 7-day smoothing and monthly totals to reveal both short-term volatility and long-term patterns.</div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Key Findings</div>
+      <ul class="small" id="keyFindings">
+        <li>Loading insights…</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card chart-wrap">
+        <div class="section-title">Daily New Cases — raw vs 7‑day average</div>
+        <canvas id="casesChart" height="160"></canvas>
+        <div class="insight" id="casesInsight">Analyzing…</div>
+      </div>
+
+      <div class="card chart-wrap" style="margin-top:14px">
+        <div class="section-title">Daily New Deaths — raw vs 7‑day average</div>
+        <canvas id="deathsChart" height="160"></canvas>
+        <div class="insight" id="deathsInsight">Analyzing…</div>
+      </div>
+
+      <div class="card chart-wrap" style="margin-top:14px">
+        <div class="section-title">Monthly Aggregates — Cases & Deaths</div>
+        <canvas id="monthlyChart" height="120"></canvas>
+        <div class="insight" id="monthlyInsight">Analyzing…</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="section-title">Snapshot Metrics</div>
+        <div class="metrics" id="metricsArea">
+          <div class="metric">
+            <p class="small">Latest update</p>
+            <h3 id="latestDate">—</h3>
+            <p class="small">Source date in dataset</p>
+          </div>
+          <div class="metric">
+            <p class="small">Latest new cases</p>
+            <h3 id="latestCases">—</h3>
+            <p class="small">Most recent daily reported new cases</p>
+          </div>
+          <div class="metric">
+            <p class="small">Latest new deaths</p>
+            <h3 id="latestDeaths">—</h3>
+            <p class="small">Most recent daily reported new deaths</p>
+          </div>
+          <div class="metric">
+            <p class="small">Population (OWID)</p>
+            <h3 id="pop">—</h3>
+            <p class="small">Used to compute per‑million metrics</p>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:12px">Peaks & Notable Periods</div>
+        <div class="small-grid" id="peaksArea">
+          <div class="small card" style="padding:12px">
+            <div class="kv"><strong id="peakCasesVal">—</strong><div style="margin-left:8px"><div class="small">Peak daily cases</div><div class="note" id="peakCasesDate">—</div></div></div>
+          </div>
+          <div class="small card" style="padding:12px">
+            <div class="kv"><strong id="peakDeathsVal">—</strong><div style="margin-left:8px"><div class="small">Peak daily deaths</div><div class="note" id="peakDeathsDate">—</div></div></div>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:12px">Recent data sample (tail)</div>
+        <div style="max-height:260px;overflow:auto;margin-top:8px;">
+          <table class="table" id="sampleTable">
+            <thead><tr><th>Date</th><th>New cases</th><th>7d avg</th><th>New deaths</th></tr></thead>
+            <tbody><tr><td colspan="4" class="center small">Loading…</td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="section-title" style="margin-top:12px">Comparisons</div>
+        <div class="small" id="comparisons">Loading comparisons…</div>
+
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="section-title">Context & Background</div>
+        <div class="small">Why this matters: tracking daily cases and deaths helps detect emerging waves, evaluate public-health interventions, and allocate healthcare resources. Monthly aggregates smooth daily volatility and reveal larger seasonal or policy-driven patterns.</div>
+
+        <div class="section-title" style="margin-top:12px">Methodology</div>
+        <div class="small">Data source: Our World in Data (OWID) aggregated CSV. Processing: daily values, 7‑day rolling average for smoother trend detection, and monthly sum aggregation. All calculations performed programmatically and visualized with Chart.js.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+      <div class="small">Conclusion & Actionable Takeaways • See below for concise recommended actions</div>
+      <div class="badge">Data snapshot: OWID</div>
+    </div>
+
+    <div style="margin-top:12px">
+      <div class="section-title">Conclusion</div>
+      <div class="small" id="conclusion">Loading conclusion…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function loadAndRender(){
+  const resp = await fetch('data_for_story/india_processed.json');
+  const data = await resp.json();
+
+  const times = data.timeseries.date;
+  const newCases = data.timeseries.new_cases;
+  const newDeaths = data.timeseries.new_deaths;
+  const newCases7 = data.timeseries.new_cases_7d;
+  const newDeaths7 = data.timeseries.new_deaths_7d;
+  const monthly = data.monthly;
+  const sample = data.sample_tail;
+
+  // Metrics
+  document.getElementById('latestDate').innerText = data.summary.latest_date || '—';
+  document.getElementById('latestCases').innerText = (data.summary.new_cases !== undefined) ? data.summary.new_cases.toLocaleString() : '—';
+  document.getElementById('latestDeaths').innerText = (data.summary.new_deaths !== undefined) ? data.summary.new_deaths.toLocaleString() : '—';
+  document.getElementById('pop').innerText = (data.summary.population) ? data.summary.population.toLocaleString() : '—';
+
+  // Peaks
+  const maxCases = Math.max(...newCases);
+  const idxMaxCases = newCases.indexOf(maxCases);
+  const peakCasesDate = idxMaxCases >= 0 ? times[idxMaxCases] : '—';
+
+  const maxDeaths = Math.max(...newDeaths);
+  const idxMaxDeaths = newDeaths.indexOf(maxDeaths);
+  const peakDeathsDate = idxMaxDeaths >= 0 ? times[idxMaxDeaths] : '—';
+
+  document.getElementById('peakCasesVal').innerText = maxCases.toLocaleString();
+  document.getElementById('peakCasesDate').innerText = peakCasesDate;
+  document.getElementById('peakDeathsVal').innerText = maxDeaths.toLocaleString();
+  document.getElementById('peakDeathsDate').innerText = peakDeathsDate;
+
+  // Fill sample table (last 10 rows)
+  const tbody = document.querySelector('#sampleTable tbody');
+  tbody.innerHTML = '';
+  sample.forEach(row => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${row.date}</td><td>${(row.new_cases||0).toLocaleString()}</td><td>${(row.new_cases_7d||0).toLocaleString()}</td><td>${(row.new_deaths||0).toLocaleString()}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Monthly arrays
+  const months = monthly.month;
+  const monthCases = monthly.new_cases;
+  const monthDeaths = monthly.new_deaths;
+
+  // Top months by cases
+  const monthPairs = months.map((m,i)=>({month:m,cases:monthCases[i],deaths:monthDeaths[i]}));
+  const topMonths = [...monthPairs].sort((a,b)=>b.cases-a.cases).slice(0,3);
+
+  // Key findings
+  const kf = [
+    `Peak daily cases: ${maxCases.toLocaleString()} on ${peakCasesDate}. Peak daily deaths: ${maxDeaths.toLocaleString()} on ${peakDeathsDate}.`,
+    `Recent 7‑day average smooths daily noise: last reported 7‑day avg (cases) is ${(newCases7[newCases7.length-1]||0).toFixed(1)}.`,
+    `Monthly aggregation reveals top months by cases: ${topMonths.map(t=>t.month+' ('+t.cases.toLocaleString()+')').join(', ')}.`,
+    `Long-term implication: waves are sharp and concentrated — early detection via 7‑day trends allows rapid public health response.`
+  ];
+  const kfElem = document.getElementById('keyFindings');
+  kfElem.innerHTML = '';
+  kf.forEach(s=>{
+    const li = document.createElement('li'); li.className='small'; li.innerText = s; kfElem.appendChild(li);
+  });
+
+  // Charts: Cases
+  const ctxC = document.getElementById('casesChart').getContext('2d');
+  const gradientC = ctxC.createLinearGradient(0,0,0,220);
+  gradientC.addColorStop(0, 'rgba(11,92,255,0.18)');
+  gradientC.addColorStop(1, 'rgba(11,92,255,0.02)');
+
+  const casesChart = new Chart(ctxC, {
+    type: 'line',
+    data: {
+      labels: times,
+      datasets: [
+        { label: 'New cases (daily)', data: newCases, borderColor: '#ffa500', backgroundColor: 'rgba(255,165,0,0.05)', pointRadius:0, borderWidth:1, tension:0.15, fill:false},
+        { label: '7‑day avg', data: newCases7, borderColor: '#0b5cff', backgroundColor: gradientC, pointRadius:0, borderWidth:2, tension:0.25, fill:true}
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#dfeeff'}}},
+      scales:{
+        x:{display:true,ticks:{color:'#9fb4ff',maxTicksLimit:8}},
+        y:{display:true,ticks:{color:'#9fb4ff'}}
+      },
+      interaction:{mode:'index',intersect:false}
+    }
+  });
+
+  // Deaths chart
+  const ctxD = document.getElementById('deathsChart').getContext('2d');
+  const gradientD = ctxD.createLinearGradient(0,0,0,220);
+  gradientD.addColorStop(0, 'rgba(255,59,48,0.14)');
+  gradientD.addColorStop(1, 'rgba(255,59,48,0.02)');
+
+  const deathsChart = new Chart(ctxD, {
+    type: 'line',
+    data: {
+      labels: times,
+      datasets: [
+        { label: 'New deaths (daily)', data: newDeaths, borderColor: '#ff3b30', backgroundColor: 'rgba(255,59,48,0.04)', pointRadius:0, borderWidth:1, tension:0.15, fill:false},
+        { label: '7‑day avg', data: newDeaths7, borderColor: '#ff7a7a', backgroundColor: gradientD, pointRadius:0, borderWidth:2, tension:0.25, fill:true}
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#dfeeff'}}},
+      scales:{x:{ticks:{color:'#9fb4ff'}},y:{ticks:{color:'#9fb4ff'}}},
+      interaction:{mode:'index',intersect:false}
+    }
+  });
+
+  // Monthly chart
+  const ctxM = document.getElementById('monthlyChart').getContext('2d');
+  const gradientM = ctxM.createLinearGradient(0,0,0,180);
+  gradientM.addColorStop(0,'rgba(11,92,255,0.12)');
+  gradientM.addColorStop(1,'rgba(11,92,255,0.02)');
+
+  const monthlyChart = new Chart(ctxM, {
+    type:'bar',
+    data:{
+      labels: months,
+      datasets:[
+        { type:'bar', label:'Monthly cases', data: monthCases, backgroundColor:'#0b5cff'},
+        { type:'line', label:'Monthly deaths (trend)', data: monthDeaths, borderColor:'#ff3b30', backgroundColor:'rgba(255,59,48,0.02)', tension:0.2, pointRadius:2, borderWidth:2, fill:true}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      scales:{x:{ticks:{color:'#9fb4ff'}},y:{ticks:{color:'#9fb4ff'}}},
+      plugins:{legend:{labels:{color:'#dfeeff'}}}
+    }
+  });
+
+  // Insights text for charts
+  document.getElementById('casesInsight').innerHTML = `<strong>What it shows:</strong> Daily spikes with a smoother 7‑day trend. <strong>Why:</strong> Reporting delays and localized outbreaks produce sharp peaks. <strong>Meaning:</strong> Use 7‑day avg for decision triggers. <strong>Implication:</strong> If 7‑day rises >20% week-on-week, prepare surge response.`;
+
+  document.getElementById('deathsInsight').innerHTML = `<strong>What it shows:</strong> Deaths lag case waves and have smaller absolute peaks. <strong>Why:</strong> Fatalities reflect disease severity and healthcare pressure. <strong>Meaning:</strong> Rising death trend indicates stress on care systems. <strong>Implication:</strong> Monitor hospital capacity and accelerate protective measures.`;
+
+  document.getElementById('monthlyInsight').innerHTML = `<strong>What it shows:</strong> Aggregated monthly view smoothing daily noise. <strong>Key months:</strong> ${topMonths.map(t=>t.month+' ('+t.cases.toLocaleString()+')').join(', ')}. <strong>Implication:</strong> High concentration of cases in a few months suggests wavey epidemic dynamics; vaccination & testing interventions should be timed accordingly.`;
+
+  // Comparisons area
+  const comparisons = document.getElementById('comparisons');
+  const lastMonth = months[months.length-1] || '—';
+  const lastMonthCases = monthCases[monthCases.length-1] || 0;
+  const prevMonthCases = monthCases[monthCases.length-2] || 0;
+  const pctChange = prevMonthCases>0 ? ((lastMonthCases-prevMonthCases)/prevMonthCases*100).toFixed(1) : '—';
+  comparisons.innerHTML = `Latest month (${lastMonth}) cases: <span class="highlight">${lastMonthCases.toLocaleString()}</span>, change vs previous month: <span class="highlight">${pctChange}%</span>. Peak month overall: <span class="highlight">${topMonths[0].month}</span> with <span class="highlight">${topMonths[0].cases.toLocaleString()}</span> cases.`;
+
+  // Conclusion text
+  document.getElementById('conclusion').innerHTML = `Actionable takeaways: 1) Use 7‑day averages as a primary trigger for policy action. 2) Strengthen surveillance during months that historically lead to waves (see top months). 3) Keep hospital capacity buffers ready when 7‑day deaths begin trending up.`;
+
+  // small data story final polish: show last updated summary top line
+  const conclusion = document.getElementById('latestDate');
+  // done
+}
+
+loadAndRender().catch(e=>{
+  document.body.innerHTML = '<div style="color:#fff;padding:40px;font-family:Inter,Arial">Failed to load data or render. Check that data_for_story/india_processed.json is available. Error: '+String(e)+'</div>';
+  console.error(e);
+});
+</script>
+</body>
+</html>
